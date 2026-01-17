@@ -397,8 +397,32 @@ model Survey {
   customHeadScripts     String?
   customHeadScriptsMode SurveyScriptMode? @default(add)
 
+  shareLinks            SurveyShareLink[]
+
   @@index([environmentId, updatedAt])
   @@index([segmentId])
+}
+
+/// Represents a shareable public link to survey results.
+/// Enables public access to survey summary without authentication.
+///
+/// @property id - Unique identifier for the share link
+/// @property expiresAt - Optional expiration timestamp
+/// @property revokedAt - Timestamp when the link was revoked (soft delete)
+/// @property survey - The survey whose results are being shared
+/// @property createdBy - The user who created this share link
+model SurveyShareLink {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  expiresAt DateTime? @map(name: "expires_at")
+  revokedAt DateTime? @map(name: "revoked_at")
+  survey    Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId  String
+  createdBy User      @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@index([surveyId])
+  @@index([expiresAt])
 }
 
 /// Represents a quota configuration for a survey.
@@ -850,6 +874,7 @@ model User {
   teamUsers                 TeamUser[]
   lastLoginAt               DateTime?
   isActive                  Boolean          @default(true)
+  shareLinksCreated         SurveyShareLink[]
 }
 
 /// Defines a segment of contacts based on attributes.

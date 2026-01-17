@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, Eye, ListRestart, SquarePenIcon } from "lucide-react";
+import { BarChart3, BellRing, Eye, ListRestart, SquarePenIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { TSegment } from "@formbricks/types/segment";
 import { TSurvey } from "@formbricks/types/surveys/types";
 import { TUser } from "@formbricks/types/user";
 import { useEnvironment } from "@/app/(app)/environments/[environmentId]/context/environment-context";
+import { ShareResultsModal } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/(analysis)/summary/components/ShareResultsModal";
 import { SuccessMessage } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/(analysis)/summary/components/SuccessMessage";
 import { ShareSurveyModal } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/(analysis)/summary/components/share-survey-modal";
 import { SurveyStatusDropdown } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/components/SurveyStatusDropdown";
@@ -63,6 +64,7 @@ export const SurveyAnalysisCTA = ({
   });
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isShareResultsModalOpen, setIsShareResultsModalOpen] = useState(false);
 
   const { organizationId, project } = useEnvironment();
   const { refreshSingleUseId } = useSingleUseId(survey, isReadOnly);
@@ -155,6 +157,12 @@ export const SurveyAnalysisCTA = ({
       isVisible: !isReadOnly,
     },
     {
+      icon: BarChart3,
+      tooltip: t("environments.surveys.summary.share_results"),
+      onClick: () => setIsShareResultsModalOpen(true),
+      isVisible: !isReadOnly && responseCount > 0,
+    },
+    {
       icon: Eye,
       tooltip: t("common.preview"),
       onClick: async () => {
@@ -217,6 +225,12 @@ export const SurveyAnalysisCTA = ({
         />
       )}
       <SuccessMessage environment={environment} survey={survey} />
+
+      <ShareResultsModal
+        surveyId={survey.id}
+        open={isShareResultsModalOpen}
+        setOpen={setIsShareResultsModalOpen}
+      />
 
       {responseCount > 0 && (
         <EditPublicSurveyAlertDialog
