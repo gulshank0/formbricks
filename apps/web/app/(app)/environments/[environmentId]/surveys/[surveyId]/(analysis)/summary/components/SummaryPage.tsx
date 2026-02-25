@@ -150,7 +150,7 @@ export const SummaryPage = ({
 
       try {
         // Recalculate filters inside the effect to ensure we have the latest values
-        const currentFilters = getFormattedFilters(survey, selectedFilter, dateRange);
+        const currentFilters = getFormattedFilters(survey, selectedFilter, dateRange, t);
         let updatedSurveySummary;
 
         updatedSurveySummary = await getSurveySummaryAction({
@@ -168,7 +168,7 @@ export const SummaryPage = ({
     };
 
     fetchSummary();
-  }, [selectedFilter, dateRange, survey, surveyId, initialSurveySummary]);
+  }, [selectedFilter, dateRange, survey, surveyId, initialSurveySummary, t]);
 
   const surveyMemoized = useMemo(() => {
     return replaceHeadlineRecall(survey, "default");

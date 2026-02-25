@@ -156,7 +156,7 @@ export const CustomFilter = ({ survey }: CustomFilterProps) => {
   }, [survey?.id, resetState]);
 
   const filters = useMemo(
-    () => getFormattedFilters(survey, selectedFilter, dateRange),
+    () => getFormattedFilters(survey, selectedFilter, dateRange, t),
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedFilter, dateRange]

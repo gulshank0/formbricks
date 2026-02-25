@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { TSurveyQuota } from "@formbricks/types/quota";
 import {
   TResponseFilterCriteria,
@@ -41,25 +42,28 @@ const conditionOptions: Record<string, string[]> = {
   contactInfo: ["is"],
   ranking: ["is"],
 };
-const filterOptions: Record<string, string[]> = {
-  openText: ["Filled out", "Skipped"],
+const getFilterOptions = (t: TFunction): Record<string, string[]> => ({
+  openText: [t("common.filled_out"), t("common.skipped")],
   rating: ["1", "2", "3", "4", "5"],
   nps: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-  cta: ["Clicked", "Dismissed"],
-  tags: ["Applied", "Not applied"],
-  consent: ["Accepted", "Dismissed"],
-  address: ["Filled out", "Skipped"],
-  contactInfo: ["Filled out", "Skipped"],
-  ranking: ["Filled out", "Skipped"],
-};
+  cta: [t("common.clicked"), t("common.dismissed")],
+  tags: [t("common.applied"), t("common.not_applied")],
+  consent: [t("common.accepted"), t("common.dismissed")],
+  address: [t("common.filled_out"), t("common.skipped")],
+  contactInfo: [t("common.filled_out"), t("common.skipped")],
+  ranking: [t("common.filled_out"), t("common.skipped")],
+});
 
 // Helper function to get filter options for a specific element type
 const getElementFilterOption = (
-  element: ReturnType<typeof getElementsFromBlocks>[number]
+  element: ReturnType<typeof getElementsFromBlocks>[number],
+  t: TFunction
 ): ElementFilterOptions | null => {
   if (!Object.keys(conditionOptions).includes(element.type)) {
     return null;
   }
+
+  const translatedFilterOptions = getFilterOptions(t);
 
   const baseOption = {
     type: element.type,
@@ -93,7 +97,7 @@ const getElementFilterOption = (
     default:
       return {
         ...baseOption,
-        filterComboBoxOptions: filterOptions[element.type],
+        filterComboBoxOptions: translatedFilterOptions[element.type],
       };
   }
 };
@@ -116,7 +120,8 @@ export const generateElementAndFilterOptions = (
   attributes: TSurveyContactAttributes,
   meta: TSurveyMetaFieldFilter,
   hiddenFields: TResponseHiddenFieldsFilter,
-  quotas: TSurveyQuota[]
+  quotas: TSurveyQuota[],
+  t: TFunction
 ): {
   elementOptions: ElementOptions[];
   elementFilterOptions: ElementFilterOptions[];
@@ -141,23 +146,23 @@ export const generateElementAndFilterOptions = (
   });
   elementOptions = [...elementOptions, { header: OptionsType.ELEMENTS, option: elementsOptions }];
   elements.forEach((q) => {
-    const filterOption = getElementFilterOption(q);
+    const filterOption = getElementFilterOption(q, t);
     if (filterOption) {
       elementFilterOptions.push(filterOption);
     }
   });
 
-  const tagsOptions = environmentTags?.map((t) => {
-    return { label: t.name, type: OptionsType.TAGS, id: t.id };
+  const tagsOptions = environmentTags?.map((tag) => {
+    return { label: tag.name, type: OptionsType.TAGS, id: tag.id };
   });
   if (tagsOptions && tagsOptions?.length > 0) {
     elementOptions = [...elementOptions, { header: OptionsType.TAGS, option: tagsOptions }];
-    environmentTags?.forEach((t) => {
+    environmentTags?.forEach((tag) => {
       elementFilterOptions.push({
         type: "Tags",
         filterOptions: conditionOptions.tags,
-        filterComboBoxOptions: filterOptions.tags,
-        id: t.id,
+        filterComboBoxOptions: getFilterOptions(t).tags,
+        id: tag.id,
       });
     });
   }
@@ -260,11 +265,12 @@ export const generateElementAndFilterOptions = (
 const processFilledOutSkippedFilter = (
   filterType: FilterValue["filterType"],
   elementId: string,
-  filters: TResponseFilterCriteria
+  filters: TResponseFilterCriteria,
+  t: TFunction
 ) => {
-  if (filterType.filterComboBoxValue === "Filled out") {
+  if (filterType.filterComboBoxValue === t("common.filled_out")) {
     filters.data![elementId] = { op: "filledOut" };
-  } else if (filterType.filterComboBoxValue === "Skipped") {
+  } else if (filterType.filterComboBoxValue === t("common.skipped")) {
     filters.data![elementId] = { op: "skipped" };
   }
 };
@@ -273,11 +279,12 @@ const processFilledOutSkippedFilter = (
 const processRankingFilter = (
   filterType: FilterValue["filterType"],
   elementId: string,
-  filters: TResponseFilterCriteria
+  filters: TResponseFilterCriteria,
+  t: TFunction
 ) => {
-  if (filterType.filterComboBoxValue === "Filled out") {
+  if (filterType.filterComboBoxValue === t("common.filled_out")) {
     filters.data![elementId] = { op: "submitted" };
-  } else if (filterType.filterComboBoxValue === "Skipped") {
+  } else if (filterType.filterComboBoxValue === t("common.skipped")) {
     filters.data![elementId] = { op: "skipped" };
   }
 };
@@ -338,11 +345,12 @@ const processNPSRatingFilter = (
 const processCTAFilter = (
   filterType: FilterValue["filterType"],
   elementId: string,
-  filters: TResponseFilterCriteria
+  filters: TResponseFilterCriteria,
+  t: TFunction
 ) => {
-  if (filterType.filterComboBoxValue === "Clicked") {
+  if (filterType.filterComboBoxValue === t("common.clicked")) {
     filters.data![elementId] = { op: "clicked" };
-  } else if (filterType.filterComboBoxValue === "Dismissed") {
+  } else if (filterType.filterComboBoxValue === t("common.dismissed")) {
     filters.data![elementId] = { op: "skipped" };
   }
 };
@@ -351,11 +359,12 @@ const processCTAFilter = (
 const processConsentFilter = (
   filterType: FilterValue["filterType"],
   elementId: string,
-  filters: TResponseFilterCriteria
+  filters: TResponseFilterCriteria,
+  t: TFunction
 ) => {
-  if (filterType.filterComboBoxValue === "Accepted") {
+  if (filterType.filterComboBoxValue === t("common.accepted")) {
     filters.data![elementId] = { op: "accepted" };
-  } else if (filterType.filterComboBoxValue === "Dismissed") {
+  } else if (filterType.filterComboBoxValue === t("common.dismissed")) {
     filters.data![elementId] = { op: "skipped" };
   }
 };
@@ -410,7 +419,8 @@ const processMatrixFilter = (
 const processElementFilters = (
   elements: FilterValue[],
   survey: TSurvey,
-  filters: TResponseFilterCriteria
+  filters: TResponseFilterCriteria,
+  t: TFunction
 ) => {
   if (!elements.length) return;
 
@@ -425,10 +435,10 @@ const processElementFilters = (
       case TSurveyElementTypeEnum.OpenText:
       case TSurveyElementTypeEnum.Address:
       case TSurveyElementTypeEnum.ContactInfo:
-        processFilledOutSkippedFilter(filterType, elementId, filters);
+        processFilledOutSkippedFilter(filterType, elementId, filters, t);
         break;
       case TSurveyElementTypeEnum.Ranking:
-        processRankingFilter(filterType, elementId, filters);
+        processRankingFilter(filterType, elementId, filters, t);
         break;
       case TSurveyElementTypeEnum.MultipleChoiceSingle:
       case TSurveyElementTypeEnum.MultipleChoiceMulti:
@@ -439,10 +449,10 @@ const processElementFilters = (
         processNPSRatingFilter(filterType, elementId, filters);
         break;
       case TSurveyElementTypeEnum.CTA:
-        processCTAFilter(filterType, elementId, filters);
+        processCTAFilter(filterType, elementId, filters, t);
         break;
       case TSurveyElementTypeEnum.Consent:
-        processConsentFilter(filterType, elementId, filters);
+        processConsentFilter(filterType, elementId, filters, t);
         break;
       case TSurveyElementTypeEnum.PictureSelection:
         processPictureSelectionFilter(filterType, elementId, element, filters);
@@ -548,7 +558,8 @@ const processQuotaFilters = (quotas: FilterValue[], filters: TResponseFilterCrit
 export const getFormattedFilters = (
   survey: TSurvey,
   selectedFilter: SelectedFilterValue,
-  dateRange: DateRange
+  dateRange: DateRange,
+  t: TFunction
 ): TResponseFilterCriteria => {
   const filters: TResponseFilterCriteria = {};
 
@@ -600,7 +611,7 @@ export const getFormattedFilters = (
       notApplied: [],
     };
     tags.forEach((tag) => {
-      if (tag.filterType.filterComboBoxValue === "Applied") {
+      if (tag.filterType.filterComboBoxValue === t("common.applied")) {
         filters.tags?.applied?.push(tag.elementType.label ?? "");
       } else {
         filters.tags?.notApplied?.push(tag.elementType.label ?? "");
@@ -608,7 +619,7 @@ export const getFormattedFilters = (
     });
   }
 
-  processElementFilters(elements, survey, filters);
+  processElementFilters(elements, survey, filters, t);
 
   // for hidden fields
   if (hiddenFields.length) {

@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
+import type { TFunction } from "i18next";
 import { afterEach, describe, expect, test } from "vitest";
 import { TLanguage } from "@formbricks/types/project";
 import { type TSurveyElement, TSurveyElementTypeEnum } from "@formbricks/types/surveys/elements";
@@ -11,6 +12,19 @@ import {
 } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/(analysis)/components/response-filter-context";
 import { OptionsType } from "@/app/(app)/environments/[environmentId]/surveys/[surveyId]/components/ElementsComboBox";
 import { generateElementAndFilterOptions, getFormattedFilters, getTodayDate } from "./surveys";
+
+const mockT = ((key: string) => {
+  const translations: Record<string, string> = {
+    "common.filled_out": "Filled out",
+    "common.skipped": "Skipped",
+    "common.clicked": "Clicked",
+    "common.dismissed": "Dismissed",
+    "common.applied": "Applied",
+    "common.not_applied": "Not applied",
+    "common.accepted": "Accepted",
+  };
+  return translations[key] ?? key;
+}) as unknown as TFunction;
 
 describe("surveys", () => {
   afterEach(() => {
@@ -45,7 +59,7 @@ describe("surveys", () => {
         status: "draft",
       } as unknown as TSurvey;
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, [], mockT);
 
       expect(result.elementOptions.length).toBeGreaterThan(0);
       expect(result.elementOptions[0].header).toBe(OptionsType.ELEMENTS);
@@ -69,7 +83,7 @@ describe("surveys", () => {
         { id: "tag1", name: "Tag 1", environmentId: "env1", createdAt: new Date(), updatedAt: new Date() },
       ];
 
-      const result = generateElementAndFilterOptions(survey, tags, {}, {}, {}, []);
+      const result = generateElementAndFilterOptions(survey, tags, {}, {}, {}, [], mockT);
 
       const tagsHeader = result.elementOptions.find((opt) => opt.header === OptionsType.TAGS);
       expect(tagsHeader).toBeDefined();
@@ -93,7 +107,7 @@ describe("surveys", () => {
         role: ["admin", "user"],
       };
 
-      const result = generateElementAndFilterOptions(survey, undefined, attributes, {}, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, attributes, {}, {}, [], mockT);
 
       const attributesHeader = result.elementOptions.find((opt) => opt.header === OptionsType.ATTRIBUTES);
       expect(attributesHeader).toBeDefined();
@@ -117,7 +131,7 @@ describe("surveys", () => {
         source: ["web", "mobile"],
       };
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, meta, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, meta, {}, [], mockT);
 
       const metaHeader = result.elementOptions.find((opt) => opt.header === OptionsType.META);
       expect(metaHeader).toBeDefined();
@@ -141,7 +155,7 @@ describe("surveys", () => {
         segment: ["free", "paid"],
       };
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, hiddenFields, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, hiddenFields, [], mockT);
 
       const hiddenFieldsHeader = result.elementOptions.find(
         (opt) => opt.header === OptionsType.HIDDEN_FIELDS
@@ -164,7 +178,7 @@ describe("surveys", () => {
         languages: [{ language: { code: "en" } as unknown as TLanguage } as unknown as TSurveyLanguage],
       } as unknown as TSurvey;
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, [], mockT);
 
       const othersHeader = result.elementOptions.find((opt) => opt.header === OptionsType.OTHERS);
       expect(othersHeader).toBeDefined();
@@ -262,7 +276,7 @@ describe("surveys", () => {
         status: "draft",
       } as unknown as TSurvey;
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, [], mockT);
 
       expect(result.elementFilterOptions.length).toBe(8);
       expect(result.elementFilterOptions.some((o) => o.id === "q1")).toBeTruthy();
@@ -288,7 +302,7 @@ describe("surveys", () => {
         source: ["web", "mobile"],
       };
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, meta, {}, []);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, meta, {}, [], mockT);
 
       const urlFilterOption = result.elementFilterOptions.find((o) => o.id === "url");
       const sourceFilterOption = result.elementFilterOptions.find((o) => o.id === "source");
@@ -322,7 +336,7 @@ describe("surveys", () => {
 
       const quotas = [{ id: "quota1" }];
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, quotas as any);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, quotas as any, mockT);
 
       const quotaFilterOption = result.elementFilterOptions.find((o) => o.id === "quota1");
       expect(quotaFilterOption).toBeDefined();
@@ -348,7 +362,7 @@ describe("surveys", () => {
 
       const quotas = [{ id: "quota1" }, { id: "quota2" }];
 
-      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, quotas as any);
+      const result = generateElementAndFilterOptions(survey, undefined, {}, {}, {}, quotas as any, mockT);
 
       const quota1 = result.elementFilterOptions.find((o) => o.id === "quota1");
       const quota2 = result.elementFilterOptions.find((o) => o.id === "quota2");
@@ -504,7 +518,7 @@ describe("surveys", () => {
         filter: [],
       };
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(Object.keys(result).length).toBe(0);
     });
@@ -515,7 +529,7 @@ describe("surveys", () => {
         filter: [],
       };
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.finished).toBe(true);
     });
@@ -526,7 +540,7 @@ describe("surveys", () => {
         filter: [],
       };
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.createdAt).toBeDefined();
       expect(result.createdAt?.min).toEqual(dateRange.from);
@@ -548,7 +562,7 @@ describe("surveys", () => {
         ] as any,
       };
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.tags?.applied).toContain("Tag 1");
       expect(result.tags?.notApplied).toContain("Tag 2");
@@ -570,7 +584,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.openTextQ).toEqual({ op: "filledOut" });
     });
@@ -591,7 +605,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.addressQ).toEqual({ op: "skipped" });
     });
@@ -612,7 +626,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.contactQ).toEqual({ op: "filledOut" });
     });
@@ -633,7 +647,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.rankingQ).toEqual({ op: "submitted" });
     });
@@ -654,7 +668,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.mcSingleQ).toEqual({ op: "includesOne", value: ["Choice 1"] });
     });
@@ -675,7 +689,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.mcMultiQ).toEqual({ op: "includesAll", value: ["Choice 1", "Choice 2"] });
     });
@@ -696,7 +710,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.npsQ).toEqual({ op: "equals", value: 7 });
     });
@@ -717,7 +731,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.ratingQ).toEqual({ op: "lessThan", value: 4 });
     });
@@ -738,7 +752,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.ctaQ).toEqual({ op: "clicked" });
     });
@@ -759,7 +773,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.consentQ).toEqual({ op: "accepted" });
     });
@@ -780,7 +794,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.pictureQ).toEqual({ op: "includesOne", value: ["p1"] });
     });
@@ -801,7 +815,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.matrixQ).toEqual({ op: "matrix", value: { "Row 1": "Column 1" } });
     });
@@ -817,7 +831,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.data?.plan).toEqual({ op: "equals", value: "pro" });
     });
@@ -833,7 +847,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.contactAttributes?.role).toEqual({ op: "notEquals", value: "admin" });
     });
@@ -849,7 +863,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.others?.Language).toEqual({ op: "equals", value: "en" });
     });
@@ -865,7 +879,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.meta?.source).toEqual({ op: "notEquals", value: "web" });
     });
@@ -890,7 +904,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.finished).toBe(true);
       expect(result.createdAt).toBeDefined();
@@ -909,7 +923,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.meta?.url).toEqual({ op: "contains", value: "example.com" });
     });
@@ -937,7 +951,7 @@ describe("surveys", () => {
           ],
         } as any;
 
-        const result = getFormattedFilters(survey, selectedFilter, dateRange);
+        const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
         expect(result.meta?.url).toEqual(expected);
       });
     });
@@ -953,7 +967,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.meta?.url).toBeUndefined();
     });
@@ -969,7 +983,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.meta?.url).toEqual({ op: "contains", value: "" });
     });
@@ -985,7 +999,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.meta?.source).toEqual({ op: "equals", value: "google" });
     });
@@ -1005,7 +1019,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, dateRange);
+      const result = getFormattedFilters(survey, selectedFilter, dateRange, mockT);
 
       expect(result.meta?.url).toEqual({ op: "contains", value: "formbricks.com" });
       expect(result.meta?.source).toEqual({ op: "equals", value: "newsletter" });
@@ -1022,7 +1036,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.quotas?.quota1).toEqual({ op: "screenedIn" });
     });
@@ -1038,7 +1052,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.quotas?.quota1).toEqual({ op: "screenedOut" });
     });
@@ -1054,7 +1068,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.quotas?.quota1).toEqual({ op: "screenedOutNotInQuota" });
     });
@@ -1074,7 +1088,7 @@ describe("surveys", () => {
         ],
       } as any;
 
-      const result = getFormattedFilters(survey, selectedFilter, {} as any);
+      const result = getFormattedFilters(survey, selectedFilter, {} as any, mockT);
 
       expect(result.quotas?.quota1).toEqual({ op: "screenedIn" });
       expect(result.quotas?.quota2).toEqual({ op: "screenedOutNotInQuota" });

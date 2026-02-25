@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TEnvironment } from "@formbricks/types/environment";
 import { TSurveyQuota } from "@formbricks/types/quota";
 import { TResponseWithQuotas } from "@formbricks/types/responses";
@@ -47,9 +48,10 @@ export const ResponsePage = ({
   const [hasMore, setHasMore] = useState<boolean>(initialResponses.length >= responsesPerPage);
   const [isFetchingFirstPage, setIsFetchingFirstPage] = useState<boolean>(false);
   const { selectedFilter, dateRange, resetState } = useResponseFilter();
+  const { t } = useTranslation();
 
   const filters = useMemo(
-    () => getFormattedFilters(survey, selectedFilter, dateRange),
+    () => getFormattedFilters(survey, selectedFilter, dateRange, t),
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedFilter, dateRange]
